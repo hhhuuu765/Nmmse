@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NMMS 2026 Chapter Tracker</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+
+body{
+background:linear-gradient(135deg,#fff0f6,#eef2f9);
+display:flex;
+justify-content:center;
+padding:20px;
+}
+
+.container{
+width:100%;
+max-width:950px;
+background:white;
+padding:35px;
+border-radius:25px;
+box-shadow:0 30px 70px rgba(0,0,0,0.08);
+}
+
+h1{
+text-align:center;
+font-family:'Playfair Display',serif;
+font-size:28px;
+color:#c2185b;
+margin-bottom:5px;
+}
+
+.subtitle{
+text-align:center;
+color:#666;
+margin-bottom:30px;
+}
+
+/* Timeline */
+.timeline{
+position:relative;
+margin-left:10px;
+}
+
+.timeline:before{
+content:'';
+position:absolute;
+left:12px;
+top:0;
+width:4px;
+height:100%;
+background:#f8bbd0;
+border-radius:4px;
+}
+
+.card{
+position:relative;
+margin-left:35px;
+margin-bottom:25px;
+background:#fff;
+padding:18px;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.05);
+border:1px solid #f3dce6;
+}
+
+.date{
+font-weight:600;
+color:#d81b60;
+font-size:14px;
+margin-bottom:8px;
+}
+
+/* Chapter box */
+.chapter{
+background:#fff5f9;
+padding:10px;
+border-radius:10px;
+font-size:13px;
+color:#444;
+min-height:30px;
+}
+
+/* Status */
+.status{
+margin-top:8px;
+font-size:12px;
+font-weight:600;
+padding:4px 8px;
+display:inline-block;
+border-radius:8px;
+}
+
+.completed{
+background:#d4edda;
+color:#155724;
+}
+
+.pending{
+background:#f8d7da;
+color:#721c24;
+}
+
+/* Revision */
+.revision{
+margin-top:8px;
+font-size:12px;
+padding:6px 10px;
+border-radius:8px;
+background:#fff3cd;
+color:#856404;
+display:none;
+}
+
+.footer{
+text-align:center;
+margin-top:25px;
+color:#c2185b;
+font-weight:500;
+}
+
+@media(max-width:600px){
+.container{padding:20px;}
+h1{font-size:22px;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>CHAPTER PROGRESS TRACKER</h1>
+<p class="subtitle">Every 2 Week Sunday Plan (Feb – Aug 2026)</p>
+
+<div class="timeline" id="timeline"></div>
+
+<div class="footer">
+By Diptendu
+</div>
+
+</div>
+
+<script>
+
+/* 👉 শুধু এখানে chapter + status + revision বদলাবে */
+
+let data = [
+{date:"2026-02-22", chapter:"MATH- Troirahik , Bijgonit gun vag , Mulod Sonkha , Paichitro , Ghonofol  / MAT-Coding & Decoding  / PHY. SCIENCE-Chap 1 /  GEOGRAPHY-Chapter 1,2,3,4,5,6", status:"Completed", revision:"Yes"},
+{date:"2026-03-08", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-03-22", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-04-05", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-04-19", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-05-03", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-05-17", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-05-31", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-06-14", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-06-28", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-07-12", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-07-26", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-08-09", chapter:"", status:"Pending", revision:"No"},
+{date:"2026-08-23", chapter:"", status:"Pending", revision:"No"}
+];
+
+function formatDate(d){
+return new Date(d).toLocaleDateString("en-US",
+{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+
+let timeline=document.getElementById("timeline");
+
+data.forEach(item=>{
+
+let statusClass=item.status==="Completed"?"completed":"pending";
+
+let revisionBlock="";
+if(item.revision==="Yes"){
+revisionBlock=`<div class="revision">Revision Running</div>`;
+}
+
+timeline.innerHTML+=`
+<div class="card">
+<div class="date">${formatDate(item.date)}</div>
+<div class="chapter">${item.chapter || "No chapter added yet"}</div>
+<div class="status ${statusClass}">${item.status}</div>
+${revisionBlock}
+</div>
+`;
+
+});
+
+</script>
+
+</body>
+</html>

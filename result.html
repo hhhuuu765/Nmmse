@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NMMS 2026 Result Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+
+body{
+background:linear-gradient(135deg,#fff0f6,#eef2f9);
+display:flex;
+justify-content:center;
+padding:20px;
+}
+
+.container{
+width:100%;
+max-width:1000px;
+background:white;
+padding:35px;
+border-radius:25px;
+box-shadow:0 30px 70px rgba(0,0,0,0.08);
+}
+
+h1{
+text-align:center;
+font-family:'Playfair Display',serif;
+font-size:30px;
+color:#c2185b;
+margin-bottom:5px;
+}
+
+.subtitle{
+text-align:center;
+color:#666;
+margin-bottom:25px;
+}
+
+/* Summary */
+.summary{
+background:linear-gradient(135deg,#ffe0eb,#f8f9fc);
+padding:25px;
+border-radius:20px;
+margin-bottom:30px;
+box-shadow:0 15px 40px rgba(0,0,0,0.05);
+text-align:center;
+}
+
+.summary h2{
+color:#c2185b;
+margin-bottom:15px;
+font-size:18px;
+}
+
+.avg-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
+margin-bottom:20px;
+}
+
+.avg-card{
+background:white;
+padding:15px;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.05);
+}
+
+.avg-name{font-weight:600;color:#c2185b;}
+.avg-percent{font-size:20px;font-weight:600;margin-top:5px;}
+
+.neutral-message{
+font-size:13px;
+color:#555;
+margin-top:8px;
+}
+
+/* Graph */
+.graph{
+display:flex;
+justify-content:space-around;
+align-items:flex-end;
+height:150px;
+margin-top:15px;
+}
+
+.bar-container{text-align:center;}
+
+.bar{
+width:50px;
+height:0;
+background:linear-gradient(180deg,#ff4081,#c2185b);
+border-radius:10px 10px 0 0;
+transition:height 1.2s ease;
+}
+
+.bar-label{
+margin-top:8px;
+font-size:13px;
+font-weight:500;
+}
+
+/* Timeline */
+.timeline{position:relative;margin-left:10px;}
+.timeline:before{
+content:'';position:absolute;left:12px;top:0;width:4px;height:100%;
+background:#f8bbd0;border-radius:4px;
+}
+
+.exam-card{
+position:relative;margin-left:35px;margin-bottom:25px;
+background:#fff;padding:15px;border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.05);
+border:1px solid #f3dce6;
+}
+
+.exam-date{font-weight:600;color:#d81b60;font-size:14px;}
+.exam-type{font-size:12px;color:#555;margin-bottom:8px;}
+
+.today{
+background:#ff1744;
+color:white;
+padding:3px 8px;
+font-size:10px;
+border-radius:10px;
+margin-left:8px;
+}
+
+.student{
+display:flex;
+justify-content:space-between;
+font-size:12px;
+margin-bottom:5px;
+}
+
+.footer{
+text-align:center;
+margin-top:25px;
+color:#c2185b;
+font-weight:500;
+}
+
+@media(max-width:600px){
+.container{padding:20px;}
+h1{font-size:22px;}
+.bar{width:35px;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>RESULT DASHBOARD</h1>
+<p class="subtitle">NMMS 2026 – Class VIII</p>
+
+<div class="summary">
+<h2>Overall Performance Overview</h2>
+
+<div class="avg-grid">
+<div class="avg-card">
+<div class="avg-name">Sanjukta</div>
+<div class="avg-percent" id="avgS"></div>
+</div>
+<div class="avg-card">
+<div class="avg-name">Mousam</div>
+<div class="avg-percent" id="avgM"></div>
+</div>
+</div>
+
+<div class="neutral-message">
+Performance comparison based on overall average percentage.
+</div>
+
+<div class="graph">
+<div class="bar-container">
+<div class="bar" id="barS"></div>
+<div class="bar-label">Sanjukta</div>
+</div>
+<div class="bar-container">
+<div class="bar" id="barM"></div>
+<div class="bar-label">Mousam</div>
+</div>
+</div>
+
+</div>
+
+<div class="timeline" id="timeline"></div>
+
+<div class="footer">By Diptendu</div>
+
+</div>
+
+<script>
+
+/* 👉 শুধু এখানে marks বদলাবে */
+
+let exams = [
+{date:"2026-02-28",type:"60 Marks",total:60,sanjukta:0,mousam:0},
+{date:"2026-03-14",type:"30 Marks",total:30,sanjukta:0,mousam:0},
+{date:"2026-03-28",type:"60 Marks",total:60,sanjukta:0,mousam:0},
+{date:"2026-04-11",type:"30 Marks",total:30,sanjukta:0,mousam:0},
+{date:"2026-04-25",type:"60 Marks",total:60,sanjukta:0,mousam:0},
+{date:"2026-05-09",type:"30 Marks",total:30,sanjukta:0,mousam:0},
+{date:"2026-05-30",type:"60 Marks",total:60,sanjukta:0,mousam:0},
+{date:"2026-06-06",type:"30 OMR",total:30,sanjukta:0,mousam:0},
+{date:"2026-06-13",type:"30 OMR",total:30,sanjukta:0,mousam:0},
+{date:"2026-06-20",type:"30 OMR",total:30,sanjukta:0,mousam:0},
+{date:"2026-06-27",type:"70 OMR",total:70,sanjukta:0,mousam:0},
+{date:"2026-07-04",type:"30 OMR",total:30,sanjukta:0,mousam:0},
+{date:"2026-07-11",type:"30 OMR",total:30,sanjukta:0,mousam:0},
+{date:"2026-07-18",type:"30 OMR",total:30,sanjukta:0,mousam:0},
+{date:"2026-07-25",type:"70 OMR",total:70,sanjukta:0,mousam:0},
+{date:"2026-08-01",type:"30 OMR",total:30,sanjukta:0,mousam:0},
+{date:"2026-08-08",type:"30 OMR",total:30,sanjukta:0,mousam:0},
+{date:"2026-08-15",type:"30 OMR",total:30,sanjukta:0,mousam:0},
+{date:"2026-08-29",type:"70 OMR",total:70,sanjukta:0,mousam:0}
+];
+
+let totalS=0,totalM=0,maxTotal=0;
+let today=new Date();
+
+function formatDate(d){
+return new Date(d).toLocaleDateString("en-US",
+{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+}
+
+let timeline=document.getElementById("timeline");
+
+exams.forEach(exam=>{
+totalS+=exam.sanjukta;
+totalM+=exam.mousam;
+maxTotal+=exam.total;
+
+let todayBadge="";
+if(new Date(exam.date).toDateString()===today.toDateString()){
+todayBadge=`<span class="today">TODAY</span>`;
+}
+
+timeline.innerHTML+=`
+<div class="exam-card">
+<div class="exam-date">${formatDate(exam.date)} ${todayBadge}</div>
+<div class="exam-type">${exam.type}</div>
+<div class="student"><span>Sanjukta</span><span>${exam.sanjukta}/${exam.total}</span></div>
+<div class="student"><span>Mousam</span><span>${exam.mousam}/${exam.total}</span></div>
+</div>`;
+});
+
+let avgS=((totalS/maxTotal)*100).toFixed(1);
+let avgM=((totalM/maxTotal)*100).toFixed(1);
+
+document.getElementById("avgS").innerHTML=avgS+"%";
+document.getElementById("avgM").innerHTML=avgM+"%";
+
+setTimeout(()=>{
+document.getElementById("barS").style.height=avgS+"%";
+document.getElementById("barM").style.height=avgM+"%";
+},300);
+
+</script>
+
+</body>
+</html>
