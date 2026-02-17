@@ -224,6 +224,16 @@ let exams = [
 ];
 
 let totalS=0,totalM=0,maxTotal=0;
+
+exams.forEach(exam=>{
+    // শুধু যেগুলাতে marks দেওয়া হয়েছে সেগুলো count হবে
+    if(exam.sanjukta>0 || exam.mousam>0){
+
+        totalS+=exam.sanjukta;
+        totalM+=exam.mousam;
+        maxTotal+=exam.total;
+    }
+});
 let today=new Date();
 
 function formatDate(d){
