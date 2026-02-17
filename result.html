@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NMMS 2026 Result Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial;}
+
+body{
+background:linear-gradient(135deg,#f5f7fa,#e4ecf5);
+padding:20px;
+animation:fadeIn 0.8s ease;
+}
+
+.container{
+max-width:1050px;
+margin:auto;
+background:white;
+border-radius:12px;
+box-shadow:0 15px 50px rgba(0,0,0,0.08);
+overflow:hidden;
+}
+
+.header{
+background:linear-gradient(90deg,#c2185b,#e91e63);
+color:white;
+padding:22px;
+text-align:center;
+font-size:20px;
+font-weight:700;
+letter-spacing:1px;
+}
+
+.section{
+padding:25px;
+border-bottom:1px solid #eee;
+animation:slideUp 0.6s ease;
+}
+
+.title{
+font-weight:700;
+font-size:17px;
+margin-bottom:12px;
+color:#333;
+}
+
+.leader-box{
+background:#f9fafc;
+padding:18px;
+border-radius:10px;
+border-left:5px solid #4caf50;
+font-weight:600;
+line-height:1.8;
+color:#222;
+}
+
+.exam-box{
+border:1px solid #e0e0e0;
+padding:15px;
+border-radius:10px;
+margin-bottom:14px;
+background:#fafafa;
+font-size:14px;
+transition:0.3s;
+}
+
+.exam-box:hover{
+transform:translateY(-4px);
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.pending{opacity:0.4;}
+
+.footer{
+text-align:center;
+padding:20px;
+font-size:12px;
+font-weight:600;
+color:#777;
+}
+
+button{
+background:#222;
+color:white;
+border:none;
+padding:7px 16px;
+border-radius:5px;
+cursor:pointer;
+font-size:12px;
+margin-right:8px;
+transition:0.3s;
+}
+
+button:hover{
+background:#444;
+}
+
+.motivation{
+background:linear-gradient(135deg,#fff3e0,#ffe0b2);
+padding:18px;
+border-radius:10px;
+font-size:14px;
+line-height:1.8;
+color:#4e342e;
+font-weight:500;
+}
+
+.highlight{
+color:#c2185b;
+font-weight:700;
+}
+
+@keyframes fadeIn{
+from{opacity:0;}
+to{opacity:1;}
+}
+
+@keyframes slideUp{
+from{opacity:0;transform:translateY(20px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+@media print{
+button{display:none;}
+.exam-box.pending{display:none;}
+body{background:white;}
+.container{box-shadow:none;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+NMMS 2026 Performance Dashboard
+</div>
+
+<div class="section">
+<button onclick="location.href='index.html'">Back</button>
+<button onclick="window.print()">Print</button>
+</div>
+
+<div class="section" id="leaderSection"></div>
+
+<div class="section">
+<canvas id="trendChart"></canvas>
+</div>
+
+<div class="section">
+<div class="title">Highest Single Score</div>
+<div id="bestScore"></div>
+</div>
+
+<div class="section">
+<div class="title">GPA Conversion</div>
+<div id="gpaSection"></div>
+</div>
+
+<div class="section">
+<div class="title">Performance Prediction</div>
+<div id="prediction"></div>
+</div>
+
+<div class="section">
+<div class="title">Exam Records</div>
+<div id="examSection"></div>
+</div>
+
+<div class="section">
+<div class="title">Motivation & Insight</div>
+<div id="insight" class="motivation"></div>
+</div>
+
+<div class="footer">By Diptendu</div>
+
+</div>
+
+<script>
+
+/* ===== Edit Marks Here ===== */
+let marksData={
+"2026-02-14":{s:22.5,m:9}
+};
+
+/* GPA System */
+function getGPA(p){
+if(p>=90)return 10;
+if(p>=80)return 9;
+if(p>=70)return 8;
+if(p>=60)return 7;
+if(p>=50)return 6;
+if(p>=40)return 5;
+return 4;
+}
+
+/* Schedule */
+function getExams(){
+let exams=[];
+for(let month=1;month<=8;month++){
+let d=new Date(2026,month-1,1);
+let sats=[];
+while(d.getMonth()==month-1){
+if(d.getDay()==6)sats.push(new Date(d));
+d.setDate(d.getDate()+1);
+}
+if(month>=2&&month<=5){
+if(sats[1])exams.push({date:sats[1],total:40});
+if(sats[sats.length-1])exams.push({date:sats[sats.length-1],total:40});
+}
+if(month>=6&&month<=8){
+sats.forEach(s=>exams.push({date:s,total:70}));
+}
+}
+return exams;
+}
+
+let exams=getExams();
+let totalS=0,totalM=0,maxTotal=0;
+let sPercents=[],mPercents=[],labels=[];
+let bestScore=0,bestInfo="";
+let completedCount=0;
+
+let examSection=document.getElementById("examSection");
+
+exams.forEach(exam=>{
+let y=exam.date.getFullYear();
+let mo=String(exam.date.getMonth()+1).padStart(2,'0');
+let d=String(exam.date.getDate()).padStart(2,'0');
+let dateStr=`${y}-${mo}-${d}`;
+
+let s=marksData[dateStr]?marksData[dateStr].s:0;
+let m=marksData[dateStr]?marksData[dateStr].m:0;
+let completed=(s>0||m>0);
+
+if(completed){
+completedCount++;
+totalS+=s; totalM+=m; maxTotal+=exam.total;
+let sp=(s/exam.total)*100;
+let mp=(m/exam.total)*100;
+sPercents.push(sp);
+mPercents.push(mp);
+labels.push(exam.date.toDateString());
+if(s>bestScore){bestScore=s;bestInfo=`Sanjukta - ${exam.date.toDateString()}`;}
+if(m>bestScore){bestScore=m;bestInfo=`Mousam - ${exam.date.toDateString()}`;}
+}
+
+examSection.innerHTML+=`
+<div class="exam-box ${completed?'':'pending'}">
+<strong>${exam.date.toDateString()}</strong><br>
+Total Marks: ${exam.total}<br>
+Sanjukta: ${s}<br>
+Mousam: ${m}
+</div>`;
+});
+
+/* Average */
+let avgS=maxTotal?(totalS/maxTotal)*100:0;
+let avgM=maxTotal?(totalM/maxTotal)*100:0;
+let leader=avgS>avgM?"Sanjukta":"Mousam";
+let margin=Math.abs(avgS-avgM).toFixed(2);
+
+document.getElementById("leaderSection").innerHTML=
+`<div class="leader-box">
+<span class="highlight">Current Leader:</span> ${leader}<br>
+Lead Margin: ${margin}%<br>
+Total Exams Completed: ${completedCount}
+</div>`;
+
+/* GPA */
+document.getElementById("gpaSection").innerHTML=
+`Sanjukta GPA: <strong>${getGPA(avgS)}</strong><br>
+Mousam GPA: <strong>${getGPA(avgM)}</strong>`;
+
+/* Prediction */
+let prediction="Not enough data.";
+if(sPercents.length>=2){
+let change=sPercents[sPercents.length-1]-sPercents[sPercents.length-2];
+prediction=`Next expected performance (Sanjukta): ${(avgS+change).toFixed(1)}%`;
+}
+document.getElementById("prediction").innerHTML=prediction;
+
+/* Best Score */
+document.getElementById("bestScore").innerHTML=
+`${bestScore} (${bestInfo})`;
+
+/* Bengali Motivation */
+let motivation="";
+if(avgS>avgM){
+motivation=`Mousam এখনও পিছিয়ে আছে, কিন্তু ধারাবাহিক পরিশ্রম করলে ব্যবধান কমানো সম্ভব। 
+প্রতিটি পরীক্ষা নতুন সুযোগ। নিয়মিত অনুশীলন করলে বড় উন্নতি আসবেই। 
+হাল ছেড়ে দিলে চলবে না, ধারাবাহিকতা বজায় রাখলেই সাফল্য নিশ্চিত।`;
+}else{
+motivation=`Sanjukta আরও ভালো করতে সক্ষম। সামান্য মনোযোগ আর নিয়মিত প্রস্তুতি তাকে আবার শীর্ষে তুলতে পারে। 
+প্রতিযোগিতা যত কঠিন হবে, উন্নতির সুযোগ তত বাড়বে। 
+নিজের উপর বিশ্বাস রাখলেই সফলতা আসবে।`;
+}
+document.getElementById("insight").innerHTML=motivation;
+
+/* Graph */
+new Chart(document.getElementById('trendChart'),{
+type:'line',
+data:{
+labels:labels,
+datasets:[
+{label:'Sanjukta',data:sPercents,borderColor:'#c2185b',
+backgroundColor:'rgba(194,24,91,0.15)',fill:true,tension:0.4},
+{label:'Mousam',data:mPercents,borderColor:'#1976d2',
+backgroundColor:'rgba(25,118,210,0.15)',fill:true,tension:0.4}
+]
+},
+options:{
+responsive:true,
+plugins:{legend:{display:true}},
+scales:{y:{beginAtZero:true,max:100}}
+}
+});
+
+</script>
+
+</body>
+</html>
