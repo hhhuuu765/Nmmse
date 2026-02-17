@@ -200,6 +200,10 @@ Performance comparison based on overall average percentage.
 
 /* 👉 শুধু এখানে marks বদলাবে */
 
+<script>
+
+/* 👉 শুধু এখানে marks বদলাবে */
+
 let exams = [
 {date:"2026-02-14",type:"60 Marks",total:40,sanjukta:22.5,mousam:9},
 {date:"2026-02-28",type:"60 Marks",total:60,sanjukta:0,mousam:0},
@@ -223,68 +227,65 @@ let exams = [
 {date:"2026-08-29",type:"70 OMR",total:70,sanjukta:0,mousam:0}
 ];
 
-let totalS=0,totalM=0,maxTotal=0;
+let totalS = 0;
+let totalM = 0;
+let maxTotal = 0;
 
-exams.forEach(exam=>{
-    // শুধু যেগুলাতে marks দেওয়া হয়েছে সেগুলো count হবে
-    if(exam.sanjukta>0 || exam.mousam>0){
+let today = new Date();
+let timeline = document.getElementById("timeline");
 
-        totalS+=exam.sanjukta;
-        totalM+=exam.mousam;
-        maxTotal+=exam.total;
+/* ===========================
+   1️⃣ Timeline + Calculation
+=========================== */
+
+exams.forEach(exam => {
+
+    // Timeline build
+    let todayBadge = "";
+    if(new Date(exam.date).toDateString() === today.toDateString()){
+        todayBadge = `<span class="today">TODAY</span>`;
     }
+
+    timeline.innerHTML += `
+    <div class="exam-card">
+        <div class="exam-date">${new Date(exam.date).toLocaleDateString("en-US",
+        {weekday:'short',day:'numeric',month:'short',year:'numeric'})} ${todayBadge}</div>
+        <div class="exam-type">${exam.type}</div>
+        <div class="student"><span>Sanjukta</span><span>${exam.sanjukta}/${exam.total}</span></div>
+        <div class="student"><span>Mousam</span><span>${exam.mousam}/${exam.total}</span></div>
+    </div>`;
+
+    // Only completed exams count
+    if(exam.sanjukta > 0 || exam.mousam > 0){
+        totalS += exam.sanjukta;
+        totalM += exam.mousam;
+        maxTotal += exam.total;
+    }
+
 });
-    let avgS = maxTotal ? ((totalS/maxTotal)*100).toFixed(1) : 0;
-let avgM = maxTotal ? ((totalM/maxTotal)*100).toFixed(1) : 0;
-    let maxAvg = Math.max(avgS, avgM);
+
+/* ===========================
+   2️⃣ Average Calculation
+=========================== */
+
+let avgS = maxTotal ? (totalS / maxTotal) * 100 : 0;
+let avgM = maxTotal ? (totalM / maxTotal) * 100 : 0;
+
+document.getElementById("avgS").innerHTML = avgS.toFixed(1) + "%";
+document.getElementById("avgM").innerHTML = avgM.toFixed(1) + "%";
+
+/* ===========================
+   3️⃣ Graph Dynamic Height
+=========================== */
+
+let maxAvg = Math.max(avgS, avgM);
 
 let heightS = maxAvg ? (avgS / maxAvg) * 100 : 0;
 let heightM = maxAvg ? (avgM / maxAvg) * 100 : 0;
 
 setTimeout(()=>{
-document.getElementById("barS").style.height=heightS+"%";
-document.getElementById("barM").style.height=heightM+"%";
-},300);
-let today=new Date();
-
-function formatDate(d){
-return new Date(d).toLocaleDateString("en-US",
-{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-}
-
-let timeline=document.getElementById("timeline");
-
-exams.forEach(exam=>{
-totalS+=exam.sanjukta;
-totalM+=exam.mousam;
-maxTotal+=exam.total;
-
-let todayBadge="";
-if(new Date(exam.date).toDateString()===today.toDateString()){
-todayBadge=`<span class="today">TODAY</span>`;
-}
-
-timeline.innerHTML+=`
-<div class="exam-card">
-<div class="exam-date">${formatDate(exam.date)} ${todayBadge}</div>
-<div class="exam-type">${exam.type}</div>
-<div class="student"><span>Sanjukta</span><span>${exam.sanjukta}/${exam.total}</span></div>
-<div class="student"><span>Mousam</span><span>${exam.mousam}/${exam.total}</span></div>
-</div>`;
-});
-
-let avgS=((totalS/maxTotal)*100).toFixed(1);
-let avgM=((totalM/maxTotal)*100).toFixed(1);
-
-document.getElementById("avgS").innerHTML=avgS+"%";
-document.getElementById("avgM").innerHTML=avgM+"%";
-
-setTimeout(()=>{
-document.getElementById("barS").style.height=avgS+"%";
-document.getElementById("barM").style.height=avgM+"%";
+    document.getElementById("barS").style.height = heightS + "%";
+    document.getElementById("barM").style.height = heightM + "%";
 },300);
 
 </script>
-
-</body>
-</html>
