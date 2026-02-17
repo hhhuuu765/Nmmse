@@ -288,7 +288,10 @@ let examSection=document.getElementById("examSection");
 let totalS=0,totalM=0,maxTotal=0;
 
 exams.forEach(exam=>{
-let dateStr=exam.date.toISOString().split("T")[0];
+let year = exam.date.getFullYear();
+let month = String(exam.date.getMonth()+1).padStart(2,'0');
+let day = String(exam.date.getDate()).padStart(2,'0');
+let dateStr = `${year}-${month}-${day}`;
 let s=marksData[dateStr]?marksData[dateStr].s:0;
 let m=marksData[dateStr]?marksData[dateStr].m:0;
 let completed=(s>0||m>0);
