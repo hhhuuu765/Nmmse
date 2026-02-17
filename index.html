@@ -207,11 +207,12 @@ const syllabusData = {
 en: `
 Mathematics:
 • Troirashik
-• Algebraic Numbers Multiplication & Division
-• Volume
+• Bijganitik Sonkhar Gun O Vag
+• Ghonofol
+•Mulodo Sonkha
 
 Geography:
-• Chapter 1-6
+• Chapter 1,2,3,4,5,6
 
 Physical Science:
 • Chapter 1
@@ -221,9 +222,10 @@ bn: `
 • ত্রৈরাশিক
 • বীজগাণিতিক সংখ্যার গুণ ও ভাগ
 • ঘনফল
+• মূলদ সংখ্যা
 
 ভূগোল:
-• অধ্যায় ১-৬
+• অধ্যায় ১,২,৩,৪,৫,৬
 
 ভৌত বিজ্ঞান:
 • অধ্যায় ১
@@ -337,6 +339,12 @@ syllabus.innerText = syllabus.getAttribute("data-en");
 btn.innerText="বাংলা";
 }
 }
+  function formatDate(date){
+let year = date.getFullYear();
+let month = String(date.getMonth()+1).padStart(2,'0');
+let day = String(date.getDate()).padStart(2,'0');
+return year+"-"+month+"-"+day;
+  }
 
 // FLOAT ON SCROLL
 window.addEventListener("scroll",function(){
