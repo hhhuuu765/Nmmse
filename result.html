@@ -234,6 +234,17 @@ exams.forEach(exam=>{
         maxTotal+=exam.total;
     }
 });
+    let avgS = maxTotal ? ((totalS/maxTotal)*100).toFixed(1) : 0;
+let avgM = maxTotal ? ((totalM/maxTotal)*100).toFixed(1) : 0;
+    let maxAvg = Math.max(avgS, avgM);
+
+let heightS = maxAvg ? (avgS / maxAvg) * 100 : 0;
+let heightM = maxAvg ? (avgM / maxAvg) * 100 : 0;
+
+setTimeout(()=>{
+document.getElementById("barS").style.height=heightS+"%";
+document.getElementById("barM").style.height=heightM+"%";
+},300);
 let today=new Date();
 
 function formatDate(d){
