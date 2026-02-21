@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NMMS পারফরম্যান্স ড্যাশবোর্ড</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Noto Sans Bengali',sans-serif;}
+
+body{
+background:linear-gradient(135deg,#eef2f7,#dbe9ff);
+padding:20px;
+}
+
+.container{
+max-width:950px;
+margin:auto;
+background:white;
+border-radius:15px;
+box-shadow:0 15px 40px rgba(0,0,0,0.08);
+overflow:hidden;
+}
+
+/* Countdown */
+.countdown{
+text-align:center;
+font-size:15px;
+font-weight:600;
+padding:12px;
+background:#111;
+color:white;
+animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+0%{opacity:1;}
+50%{opacity:0.6;}
+100%{opacity:1;}
+}
+
+.section{padding:20px;border-bottom:1px solid #eee;}
+
+.avg-container{
+display:flex;
+justify-content:space-between;
+gap:15px;
+}
+
+.card{
+flex:1;
+padding:14px;
+border-radius:12px;
+text-align:center;
+background:#f5f7fa;
+font-size:18px;
+font-weight:600;
+position:relative;
+transition:0.3s;
+}
+
+.glow{
+box-shadow:0 0 15px rgba(76,175,80,0.7);
+transform:scale(1.03);
+}
+
+.rank{
+position:absolute;
+top:-10px;
+right:-10px;
+background:#ff9800;
+color:white;
+width:30px;
+height:30px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:14px;
+font-weight:bold;
+}
+
+.exam-card{
+background:#f9fafc;
+padding:15px;
+border-radius:10px;
+margin-bottom:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.05);
+font-size:14px;
+}
+
+.up{color:#2e7d32;font-weight:600;}
+.down{color:#c62828;font-weight:600;}
+.neutral{color:#555;}
+
+h3{margin-bottom:10px;}
+
+.footer{
+text-align:center;
+padding:15px;
+font-size:12px;
+color:#888;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="countdown" id="countdown"></div>
+
+<div class="section">
+<div class="avg-container">
+<div class="card" id="cardS"></div>
+<div class="card" id="cardM"></div>
+</div>
+</div>
+
+<div class="section">
+<canvas id="trendChart"></canvas>
+</div>
+
+<div class="section">
+<h3>সম্পন্ন পরীক্ষা</h3>
+<div id="completedSection"></div>
+
+<h3 style="margin-top:20px;">আসন্ন পরীক্ষা</h3>
+<div id="upcomingSection"></div>
+</div>
+
+<div class="footer">তৈরি করেছেন – দিপ্তেন্দু</div>
+
+</div>
+
+<script>
+
+/* ===== মার্কস ===== */
+let marksData={
+"2026-02-14":{s:22.5,m:9,total:40}
+};
+
+/* ===== পরীক্ষা তৈরি ===== */
+function getExams(){
+let exams=[];
+for(let month=2;month<=8;month++){
+let d=new Date(2026,month-1,1);
+let sats=[];
+while(d.getMonth()==month-1){
+if(d.getDay()==6)sats.push(new Date(d));
+d.setDate(d.getDate()+1);
+}
+if(month>=2&&month<=5){
+if(sats[1])exams.push({date:sats[1],total:40});
+if(sats[sats.length-1])exams.push({date:sats[sats.length-1],total:40});
+}
+if(month>=6&&month<=8){
+sats.forEach(s=>exams.push({date:s,total:70}));
+}
+}
+return exams;
+}
+
+let exams=getExams();
+
+let totalS=0,totalM=0,totalFull=0;
+let labels=[],sData=[],mData=[];
+let lastS=null,lastM=null;
+
+let completedSection=document.getElementById("completedSection");
+let upcomingSection=document.getElementById("upcomingSection");
+
+exams.forEach(exam=>{
+let y=exam.date.getFullYear();
+let mo=String(exam.date.getMonth()+1).padStart(2,'0');
+let d=String(exam.date.getDate()).padStart(2,'0');
+let dateStr=`${y}-${mo}-${d}`;
+
+if(marksData[dateStr]){
+
+let s=marksData[dateStr].s;
+let m=marksData[dateStr].m;
+let total=marksData[dateStr].total;
+
+let sPer=(s/total)*100;
+let mPer=(m/total)*100;
+
+totalS+=s;
+totalM+=m;
+totalFull+=total;
+
+labels.push(dateStr);
+sData.push(sPer.toFixed(1));
+mData.push(mPer.toFixed(1));
+
+let changeS=null, changeM=null;
+
+if(lastS!==null){
+changeS=sPer-lastS;
+changeM=mPer-lastM;
+}
+
+lastS=sPer;
+lastM=mPer;
+
+completedSection.innerHTML+=`
+<div class="exam-card">
+<strong>তারিখ: ${dateStr}</strong><br>
+সংযুক্তা: ${s} (${sPer.toFixed(1)}%) 
+${changeS!==null?
+(changeS>0?'<span class="up">📈 +'+changeS.toFixed(1)+'%</span>':
+changeS<0?'<span class="down">📉 '+changeS.toFixed(1)+'%</span>':
+'<span class="neutral">➖ 0%</span>')
+:''}<br>
+মৌসম: ${m} (${mPer.toFixed(1)}%) 
+${changeM!==null?
+(changeM>0?'<span class="up">📈 +'+changeM.toFixed(1)+'%</span>':
+changeM<0?'<span class="down">📉 '+changeM.toFixed(1)+'%</span>':
+'<span class="neutral">➖ 0%</span>')
+:''}
+</div>
+`;
+
+}else{
+upcomingSection.innerHTML+=`
+<div class="exam-card">
+<strong>তারিখ: ${dateStr}</strong><br>
+পরীক্ষা বাকি আছে
+</div>
+`;
+}
+
+});
+
+/* ===== গড় ===== */
+let avgS=((totalS/totalFull)*100)||0;
+let avgM=((totalM/totalFull)*100)||0;
+
+let leader=avgS>avgM?"S":"M";
+
+function buildCard(name,avg,isLeader){
+return `
+${isLeader?'<div class="rank">১</div>':'<div class="rank">২</div>'}
+${name}<br>
+গড়: ${avg.toFixed(1)}%
+`;
+}
+
+document.getElementById("cardS").innerHTML=
+buildCard("সংযুক্তা",avgS,leader==="S");
+
+document.getElementById("cardM").innerHTML=
+buildCard("মৌসম",avgM,leader==="M");
+
+if(leader==="S"){
+document.getElementById("cardS").classList.add("glow");
+}else{
+document.getElementById("cardM").classList.add("glow");
+}
+
+/* ===== গ্রাফ ===== */
+new Chart(document.getElementById('trendChart'),{
+type:'bar',
+data:{
+labels:labels,
+datasets:[
+{label:'সংযুক্তা (%)',data:sData,backgroundColor:'#e91e63'},
+{label:'মৌসম (%)',data:mData,backgroundColor:'#2196f3'}
+]
+},
+options:{
+responsive:true,
+scales:{y:{beginAtZero:true,max:100}}
+}
+});
+
+/* ===== Countdown ===== */
+function getNextSaturday5PM(){
+let now=new Date();
+let result=new Date();
+let day=now.getDay();
+let diff=(6-day+7)%7;
+result.setDate(now.getDate()+diff);
+result.setHours(17,0,0,0);
+if(now>result){ result.setDate(result.getDate()+7); }
+return result;
+}
+
+function updateCountdown(){
+let now=new Date();
+let target=getNextSaturday5PM();
+
+if(now>=target){
+document.getElementById("countdown").innerHTML="🔥 পরীক্ষা শুরু হয়েছে!";
+document.getElementById("countdown").style.animation="none";
+return;
+}
+
+let distance=target-now;
+let days=Math.floor(distance/(1000*60*60*24));
+let hours=Math.floor((distance%(1000*60*60*24))/(1000*60*60));
+let minutes=Math.floor((distance%(1000*60*60))/(1000*60));
+let seconds=Math.floor((distance%(1000*60))/1000);
+
+document.getElementById("countdown").innerHTML=
+`পরবর্তী পরীক্ষা শুরু হতে বাকি: ${days} দিন ${hours} ঘন্টা ${minutes} মিনিট ${seconds} সেকেন্ড`;
+}
+
+setInterval(updateCountdown,1000);
+updateCountdown();
+
+</script>
+
+</body>
+</html>
