@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  
+  <div id="resultPopup" class="result-popup-btn"></div>
+  <div id="resultPopup" class="result-popup"></div>
+  <div id="resultNotice" class="result-notice"></div>
+  <div id="examZone" class="exam-zone"></div>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@500;600;700&display=swap" rel="stylesheet">
+  <div class="today-box">
+ Today: <span id="todayDate"></span>
+</div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NMMS Exam Planner 2026</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+<div class="quote-box">
+  <span id="quoteText"></span>
+</div>
+<style>
+.result-popup-btn{
+position:fixed;
+top:15px;
+left:50%;
+transform:translateX(-50%);
+background:linear-gradient(135deg,#4caf50,#66bb6a);
+color:white;
+padding:10px 20px;
+border-radius:30px;
+font-weight:600;
+font-size:14px;
+box-shadow:0 8px 25px rgba(0,0,0,0.15);
+z-index:99999;
+display:none;
+cursor:pointer;
+animation:fadeSlide 0.4s ease;
+transition:0.3s ease;
+}
+
+.result-popup-btn:hover{
+transform:translateX(-50%) scale(1.05);
+box-shadow:0 12px 35px rgba(0,0,0,0.2);
+}
+
+@keyframes fadeSlide{
+from{
+opacity:0;
+transform:translate(-50%,-10px);
+}
+to{
+opacity:1;
+transform:translate(-50%,0);
+}
+}
+.result-popup{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+background:linear-gradient(90deg,#4caf50,#81c784);
+color:white;
+text-align:center;
+font-weight:700;
+font-size:15px;
+padding:10px;
+z-index:99999;
+display:none;
+animation:slideDown 0.4s ease;
+}
+
+@keyframes slideDown{
+from{transform:translateY(-100%);}
+to{transform:translateY(0);}
+}
+.result-notice{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+text-align:center;
+background:#ff9800;
+color:white;
+font-weight:600;
+padding:8px;
+z-index:9999;
+display:none;
+animation:blinkNotice 1.2s infinite alternate;
+}
+
+@keyframes blinkNotice{
+from{opacity:1;}
+to{opacity:0.6;}
+}
+/* RUNNING RESULT NOTICE */
+
+.top-runner{
+width:100%;
+background:linear-gradient(90deg,#81c784,#f8bbd0,#d4af37);
+overflow:hidden;
+white-space:nowrap;
+padding:8px 0;
+position:relative;
+}
+
+.runner-text{
+display:inline-block;
+color:#ffffff;
+font-weight:600;
+font-size:14px;
+padding-left:100%;
+animation:scrollText 15s linear infinite;
+}
+
+@keyframes scrollText{
+0%{
+transform:translateX(0);
+}
+100%{
+transform:translateX(-100%);
+}
+}
+/* WELL DONE POPUP */
+.well-done{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:linear-gradient(135deg,#81c784,#66bb6a);
+color:white;
+padding:25px 40px;
+border-radius:25px;
+font-size:22px;
+font-weight:700;
+z-index:9999;
+box-shadow:0 20px 50px rgba(0,0,0,0.2);
+animation:popIn 0.5s ease;
+}
+
+@keyframes popIn{
+from{transform:translate(-50%,-60%) scale(0.8); opacity:0;}
+to{transform:translate(-50%,-50%) scale(1); opacity:1;}
+}
+
+/* Simple Confetti Dots */
+.confetti{
+position:fixed;
+width:8px;
+height:8px;
+background:gold;
+top:0;
+animation:fall 3s linear forwards;
+}
+
+@keyframes fall{
+to{
+transform:translateY(100vh) rotate(720deg);
+opacity:0;
+}
+}
+/* 24H ALERT MODE */
+.countdown-box.alert-24h{
+font-size:20px !important;
+font-weight:700 !important;
+color:#f44336 !important;
+animation:pulseAlert 1s infinite alternate;
+}
+
+@keyframes pulseAlert{
+from{transform:scale(1);}
+to{transform:scale(1.05);}
+}
+/* TODAY BLINK CARD */
+.card.today-exam{
+border:2px solid #ff9800;
+background:linear-gradient(135deg,#81c784,#ffcc80);
+animation:todayBlink 1s infinite alternate;
+}
+
+@keyframes todayBlink{
+from{box-shadow:0 0 10px rgba(255,152,0,0.4);}
+to{box-shadow:0 0 25px rgba(76,175,80,0.8);}
+}
+
+/* Countdown Dynamic Base */
+.countdown-box{
+transition:0.4s ease;
+color:white;
+font-weight:600;
+}
+.quote-box{
+transition:opacity 0.5s ease;
+}
+.quote-box{
+margin:25px 0;
+padding:22px 25px;
+border-radius:22px;
+background:linear-gradient(135deg,#ffffff,#f8fdf9);
+border:2px solid #dfeee3;
+text-align:center;
+font-family:'Hind Siliguri', sans-serif;
+font-size:20px;
+font-weight:600;
+line-height:1.8;
+color:#1b5e20;
+box-shadow:0 10px 30px rgba(0,0,0,0.05);
+letter-spacing:0.4px;
+transition:0.4s ease;
+}
+
+.quote-box:hover{
+transform:translateY(-4px);
+box-shadow:0 15px 40px rgba(0,0,0,0.08);
+}
+
+@media(max-width:600px){
+.quote-box{
+font-size:18px;
+padding:18px;
+}
+}
+.upcoming-box{
+background:linear-gradient(135deg,#e8f5e9,#ffffff);
+padding:22px;
+border-radius:22px;
+margin-bottom:30px;
+position:relative;
+border:2px solid #81c784;
+box-shadow:0 0 20px rgba(129,199,132,0.4);
+animation:upGlow 2.5s infinite alternate;
+}
+
+@keyframes upGlow{
+from{
+box-shadow:0 0 15px rgba(129,199,132,0.4);
+}
+to{
+box-shadow:0 0 35px rgba(129,199,132,0.7);
+}
+}
+.countdown-box{
+margin-top:14px;
+background:linear-gradient(145deg,#ffffff,#f2f4f8);
+padding:14px;
+border-radius:16px;
+font-size:14px;
+font-weight:500;
+border:1.5px solid #dcdfe6;
+color:#444;
+backdrop-filter:blur(6px);
+box-shadow:
+0 0 8px rgba(200,200,210,0.6),
+0 0 18px rgba(220,220,230,0.5),
+inset 0 0 10px rgba(255,255,255,0.9);
+animation:silverGlow 3s infinite alternate;
+}
+
+/* subtle crystal shine */
+@keyframes silverGlow{
+from{
+box-shadow:
+0 0 6px rgba(210,210,220,0.4),
+0 0 15px rgba(230,230,240,0.5),
+inset 0 0 8px rgba(255,255,255,0.8);
+}
+to{
+box-shadow:
+0 0 12px rgba(220,220,230,0.8),
+0 0 28px rgba(240,240,250,0.7),
+inset 0 0 12px rgba(255,255,255,1);
+}
+}
+.upcoming-box b{
+font-size:18px;
+color:#2e7d32;
+display:block;
+margin-bottom:8px;
+}
+
+.upcoming-box{
+font-size:15px;
+line-height:1.7;
+color:#333;
+}
+.today-box{
+text-align:center;
+background:linear-gradient(135deg,#ffffff,#f1f8e9);
+padding:10px;
+border-radius:18px;
+margin-bottom:15px;
+font-weight:500;
+color:#555;
+box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+#scrollBar{
+position:fixed;
+top:0;
+left:0;
+height:4px;
+width:0%;
+background:linear-gradient(90deg,#81c784,#f8bbd0,#d4af37);
+z-index:9999;
+transition:width 0.2s ease;
+}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#ffffff,#f4f8f6);
+padding:18px;
+}
+
+/* CONTAINER */
+
+.container{
+max-width:1000px;
+margin:auto;
+background:white;
+border-radius:24px;
+padding:28px;
+box-shadow:0 20px 50px rgba(0,0,0,0.06);
+}
+
+/* TITLE */
+
+h1{
+text-align:center;
+font-size:26px;
+font-weight:700;
+background:linear-gradient(90deg,#81c784,#f8bbd0,#d4af37);
+-webkit-background-clip:text;
+color:transparent;
+margin-bottom:25px;
+}
+
+/* TOP BUTTONS */
+
+.top-buttons{
+display:flex;
+justify-content:center;
+gap:14px;
+margin-bottom:30px;
+transition: all 0.6s cubic-bezier(.22,1,.36,1);
+}
+
+/* SMOOTH FLOAT EFFECT */
+
+.top-buttons.float{
+position:fixed;
+right:18px;
+bottom:25px;
+flex-direction:column;
+gap:10px;
+z-index:999;
+transform:translateY(0);
+animation:smoothDrop 0.6s cubic-bezier(.22,1,.36,1);
+}
+
+@keyframes smoothDrop{
+from{
+transform:translateY(60px);
+opacity:0;
+}
+to{
+transform:translateY(0);
+opacity:1;
+}
+}
+
+/* BUTTON STYLE */
+
+.glass-btn{
+background:linear-gradient(135deg,#e8f5e9,#fce4ec);
+color:#444;
+padding:10px 22px;
+border-radius:30px;
+text-decoration:none;
+font-weight:500;
+font-size:14px;
+border:1px solid #e0e0e0;
+box-shadow:0 8px 20px rgba(0,0,0,0.05);
+transition: all 0.3s ease;
+}
+
+.glass-btn:hover{
+transform:translateY(-4px);
+box-shadow:0 12px 25px rgba(0,0,0,0.08);
+}
+
+/* FLOAT SMALL BUTTON */
+
+.top-buttons.float .glass-btn{
+padding:7px 16px;
+font-size:12px;
+border-radius:20px;
+background:linear-gradient(135deg,#ffffff,#f1f1f1);
+}
+
+/* UPCOMING */
+
+.upcoming-box{
+background:linear-gradient(135deg,#e8f5e9,#ffffff);
+padding:20px;
+border-radius:20px;
+margin-bottom:30px;
+box-shadow:0 12px 30px rgba(129,199,132,0.2);
+position:relative;
+}
+
+.badge{
+position:absolute;
+top:12px;
+right:12px;
+background:linear-gradient(135deg,#ffd700,#d4af37);
+color:white;
+padding:4px 12px;
+font-size:11px;
+border-radius:20px;
+}
+
+.countdown-box{
+margin-top:12px;
+background:#ffffff;
+padding:10px;
+border-radius:12px;
+font-size:13px;
+box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+/* CALENDAR */
+
+.calendar{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+gap:18px;
+}
+
+/* CARD */
+
+.card{
+background:#ffffff;
+padding:18px;
+border-radius:18px;
+box-shadow:0 10px 30px rgba(0,0,0,0.05);
+transition:0.3s;
+position:relative;
+border:1px solid #f0f0f0;
+}
+
+.card:hover{
+transform:translateY(-6px);
+box-shadow:0 18px 40px rgba(0,0,0,0.08);
+}
+
+.card h3{
+font-size:15px;
+font-weight:600;
+color:#444;
+margin-bottom:8px;
+}
+
+.syllabus{
+background:#f9f9f9;
+padding:12px;
+border-radius:12px;
+font-size:13px;
+line-height:1.6;
+color:#555;
+}
+
+/* DONE FULL GREEN CLEAN */
+
+.card.done-card{
+background:linear-gradient(135deg,#81c784,#a5d6a7);
+color:white;
+border:none;
+}
+
+.card.done-card h3{
+color:white;
+}
+
+.card.done-card .syllabus{
+background:rgba(255,255,255,0.15);
+color:white;
+}
+
+.done-label{
+position:absolute;
+top:10px;
+right:10px;
+background:#2e7d32;
+color:white;
+padding:4px 10px;
+font-size:11px;
+border-radius:15px;
+}
+
+/* TRANSLATE BUTTON */
+
+.translate-btn{
+margin-top:8px;
+background:linear-gradient(135deg,#f8bbd0,#f48fb1);
+border:none;
+color:white;
+padding:5px 14px;
+border-radius:18px;
+cursor:pointer;
+font-size:12px;
+transition:0.3s;
+}
+
+.translate-btn:hover{
+transform:scale(1.05);
+}
+
+/* FOOTER */
+
+.footer{
+text-align:center;
+margin-top:40px;
+font-size:12px;
+color:#999;
+}
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+.calendar{
+grid-template-columns:1fr;
+}
+
+.container{
+padding:18px;
+}
+
+h1{
+font-size:20px;
+}
+
+}
+
+</style>
+</head>
+<div id="scrollBar"></div>
+<div class="top-runner">
+  <div class="runner-text">
+    Result দেখতে “View Your Result” এ click করো
+  </div>
+</div>
+<body>
+
+<div class="container">
+
+<h1>NMMS 2026 Exam Planner</h1>
+
+<div class="top-buttons" id="topButtons">
+<a href="result.html" class="glass-btn">View Your Result</a>
+<a href="chap.html" class="glass-btn">Chapters View</a>
+</div>
+
+<div class="upcoming-box">
+<div class="badge">Upcoming</div>
+<div id="upcomingContent"></div>
+<div class="countdown-box" id="countdown"></div>
+</div>
+
+<div class="calendar" id="calendar"></div>
+
+<div class="footer">By Diptendu</div>
+
+</div>
+
+<script>
+  /* ===== ADMIN DEMO SYSTEM ===== */
+
+const ADMIN_PIN = "0000";
+
+let demoMode = localStorage.getItem("demoMode") === "true";
+
+let fakeNow = new Date("2026-02-28T16:00:00");
+
+function getNow(){
+  return demoMode ? fakeNow : new Date();
+}
+
+// ===== SYLLABUS ADD AREA =====
+const syllabusData = {
+"2026-02-28": {
+en: `
+Mathematics:
+• Troirashik
+• Bijganitik Sonkhar Gun O Vag
+• Ghonofol
+•Mulodo Sonkha
+
+Geography:
+• Chapter 1,2,3,4,5,6
+
+Physical Science:
+• Chapter 1
+`,
+bn: `
+গণিত:
+• ত্রৈরাশিক
+• বীজগাণিতিক সংখ্যার গুণ ও ভাগ
+• ঘনফল
+• মূলদ সংখ্যা
+
+ভূগোল:
+• অধ্যায় ১,২,৩,৪,৫,৬
+
+ভৌত বিজ্ঞান:
+• অধ্যায় ১
+`
+},
+  
+
+"2026-02-14": {
+en: `
+Mathematics:
+• Troirashik
+• Bijganitik Sonkhar Gun O Vag
+•Mulodo Sonkha
+
+MAT: C & D
+
+Geography:
+• Chapter 1,2,3,4
+`,
+bn: `
+গণিত:
+• ত্রৈরাশিক
+• বীজগাণিতিক সংখ্যার গুণ ও ভাগ
+• মূলদ সংখ্যা
+MAT: কোডিং ও ডিকোডিং 
+
+ভূগোল:
+• অধ্যায় ১,২,৩,৪
+`
+}
+};
+const quotes = [
+"তুমি যতটা ভাবছ তার চেয়েও বেশি সক্ষম।",
+"প্রতিদিন একটু একটু উন্নতি করো।",
+"অন্যকে নয়, নিজেকে হারাও।",
+"স্বপ্ন দেখো, কাজ করো, সফল হও।",
+"অজুহাত নয়, ফলাফল দাও।",
+"আজকের কষ্টই আগামীর শক্তি।",
+"সময় নষ্ট মানে জীবন নষ্ট।",
+"ছোট পদক্ষেপ বড় সাফল্য আনে।",
+"হার মানা মানে শেষ নয়।",
+"ধৈর্যই সাফল্যের চাবিকাঠি।",
+"নিজের উপর বিশ্বাস রাখো।",
+"কষ্ট ছাড়া কেষ্ট মেলে না।",
+"আজ শুরু করো, কাল নয়।",
+"পরিশ্রম কখনো প্রতারণা করে না।",
+"নিজেকে প্রতিদিন ১% ভালো করো।",
+"ব্যর্থতা হলো শেখার সুযোগ।",
+"অভ্যাসই তোমাকে গড়বে।",
+"মন ঠিক থাকলে পথ মিলবেই।",
+"সাহস থাকলে অসম্ভব কিছু নেই।",
+"কাজই তোমার পরিচয়।",
+"সময়কে সম্মান করো।",
+"চেষ্টা চালিয়ে যাও।",
+"নিজের সীমা ভাঙো।",
+"শৃঙ্খলাই আসল শক্তি।",
+"স্বপ্নকে বাস্তব বানাও।",
+"পড়াশোনা তোমার বিনিয়োগ।",
+"আজকের পরিশ্রম কালকে সহজ করবে।",
+"নিজের সাথে প্রতিযোগিতা করো।",
+"ধীরে চললেও থেমো না।",
+"তোমার লক্ষ্যই তোমার দিশা।",
+"চাপ নয়, চ্যালেঞ্জ ভাবো।",
+"ভুল করো, শিখো, এগোও।",
+"সময় ফিরে আসে না।",
+"তোমার ভবিষ্যৎ তোমার হাতে।",
+"ভয়কে জয় করো।",
+"নিজেকে ছোট ভাবো না।",
+"আজকে জয় করো।",
+"লক্ষ্য বড় রাখো।",
+"পরিশ্রমই সেরা প্রতিভা।",
+"মনোযোগই শক্তি।",
+"শুরু করাই অর্ধেক কাজ।",
+"হাল ছাড়বে না।",
+"নিজেকে প্রমাণ করো।",
+"আজ একটু বেশি চেষ্টা করো।",
+"শক্ত হও, স্থির থাকো।",
+"ইচ্ছাশক্তিই জ্বালানি।",
+"নিজের গল্প নিজেই লেখো।",
+"সাফল্য সময় নেয়।",
+"আজকের দিনটাই গুরুত্বপূর্ণ।",
+"প্রতিদিন নতুন সুযোগ।",
+"মাথা ঠান্ডা, লক্ষ্য গরম।",
+"নিজের উন্নতিই আসল জয়।",
+"অপেক্ষা নয়, প্রস্তুতি।",
+"পড়াশোনাই শক্তি।",
+"দৃঢ় হও।",
+"পরিশ্রমের বিকল্প নেই।",
+"আজই বদলাও।",
+"একাগ্রতাই সাফল্য।",
+"লক্ষ্যে ফোকাস রাখো।",
+"তুমি পারবে।",
+"আজকের সময়টাই তোমার সুযোগ।",
+"ছোট জয়ের উপর দাঁড়ায় বড় জয়।",
+"নিজেকে উন্নত করাই আসল লক্ষ্য।",
+"প্রচেষ্টা কখনো বৃথা যায় না।",
+"নিজের ভুল থেকে শেখো।",
+"মনোযোগ দিলে অসম্ভবও সম্ভব।",
+"তোমার স্বপ্ন তোমার দায়িত্ব।",
+"নিজেকে হারিয়ে ফেলো না।",
+"যা শুরু করেছ শেষ করো।",
+"আজকের ঘাম আগামীর গর্ব।",
+"সাফল্য ধৈর্যের ফল।",
+"কাজ করো, ফল আসবেই।",
+"নিজের শক্তিকে চিনো।",
+"সময়কে কাজে লাগাও।",
+"লক্ষ্য পরিষ্কার রাখো।",
+"আজ একটু এগোও।",
+"অন্যের কথা নয়, নিজের লক্ষ্য দেখো।",
+"নিজেকে বিশ্বাস করো।",
+"সাহস মানেই এগিয়ে যাওয়া।",
+"পরিশ্রমই আসল সম্পদ।",
+"নিজের উপর নিয়ন্ত্রণ রাখো।",
+"অলসতা ছাড়ো।",
+"আজই শুরু করার সেরা দিন।",
+"অভ্যাস বদলালে জীবন বদলাবে।",
+"নিজের উন্নতি দেখো।",
+"হাল ছাড়বে না কখনো।",
+"শেখা বন্ধ করো না।",
+"প্রচেষ্টা চালিয়ে যাও।",
+"নিজের সময়কে সম্মান করো।",
+"লক্ষ্যে চোখ রাখো।",
+"কঠিন সময়ই মানুষ গড়ে।",
+"আজ একটু শক্ত হও।",
+"ভবিষ্যৎ আজ থেকেই শুরু।",
+"নিজেকে প্রতিদিন প্রমাণ করো।",
+"যত পড়বে তত এগোবে।",
+"নিজের লক্ষ্য নিজেই ঠিক করো।",
+"তোমার চেষ্টাই তোমার পরিচয়।"
+];
+
+function updateQuote(){
+let box = document.getElementById("quoteText");
+box.style.opacity = 0;
+
+setTimeout(()=>{
+let index = Math.floor(Math.random() * quotes.length);
+box.innerText = quotes[index];
+box.style.opacity = 1;
+},300);
+}
+
+updateQuote();
+setInterval(updateQuote, 4000);
+document.getElementById("todayDate").innerText =
+new Date().toDateString();
+window.addEventListener("scroll",function(){
+let scrollTop = document.documentElement.scrollTop;
+let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+let scrolled = (scrollTop / height) * 100;
+document.getElementById("scrollBar").style.width = scrolled + "%";
+});
+function getSecondSaturday(year, month){
+let date = new Date(year, month, 1);
+let count = 0;
+while(date.getMonth() === month){
+if(date.getDay() === 6){
+count++;
+if(count === 2) return new Date(date);
+}
+date.setDate(date.getDate()+1);
+}
+}
+
+function getLastSaturday(year, month){
+let date = new Date(year, month+1, 0);
+while(date.getDay() !== 6){
+date.setDate(date.getDate()-1);
+}
+return date;
+}
+
+function formatDate(date){
+return date.toISOString().split('T')[0];
+}
+
+let calendar = document.getElementById("calendar");
+let today = new Date();
+let upcomingDate = null;
+
+function addExam(date){
+let formatted = formatDate(date);
+let display = date.toDateString();
+
+let syllabus = syllabusData[formatted] || {en:"Syllabus Not Added Yet",bn:"সিলেবাস এখনো যোগ করা হয়নি"};
+
+let card = document.createElement("div");
+card.className="card";
+
+if(date < today){
+card.classList.add("done-card");
+card.innerHTML = `<div class="done-label">Done</div>`;
+}
+
+card.innerHTML += `
+<h3>${display}</h3>
+<div class="syllabus" data-en="${syllabus.en}" data-bn="${syllabus.bn}">
+${syllabus.en}
+</div>
+<button class="translate-btn" onclick="toggleLang(this)">বাংলা</button>
+`;
+
+calendar.appendChild(card);
+
+if(date >= today && !upcomingDate){
+upcomingDate = date;
+document.getElementById("upcomingContent").innerHTML =
+"<b>"+display+"</b><br>"+syllabus.en;
+}
+}
+
+for(let m=1; m<=4; m++){
+addExam(getSecondSaturday(2026,m));
+addExam(getLastSaturday(2026,m));
+}
+
+for(let m=5; m<=7; m++){
+let date = new Date(2026,m,1);
+while(date.getMonth()===m){
+if(date.getDay()===6) addExam(new Date(date));
+date.setDate(date.getDate()+1);
+}
+}
+
+function updateCountdown(){
+if(!upcomingDate) return;
+
+let now = new Date().getTime();
+let distance = upcomingDate.getTime() - now;
+
+if(distance < 0){
+document.querySelector(".badge").innerText="Done";
+document.querySelector(".badge").style.background="#2e7d32";
+document.getElementById("countdown").innerText="Exam Completed";
+return;
+}
+/* ===== SIMPLE FONT COLOR CHANGE ONLY ===== */
+
+function simpleTodayColor(){
+
+if(!upcomingDate) return;
+
+let now = new Date();
+let examDate = new Date(upcomingDate);
+examDate.setHours(17,0,0,0);
+
+let distance = examDate - now;
+let days = Math.floor(distance/(1000*60*60*24));
+
+let countdownBox = document.getElementById("countdown");
+let badge = document.querySelector(".badge");
+
+/* Today logic */
+if(days === 0){
+badge.innerText = "Today";
+badge.style.background = "orange";
+countdownBox.style.color = "#f44336"; // red font
+}
+
+/* Day based font colour only */
+
+else if(days === 1){
+countdownBox.style.color = "#e91e63"; // pink
+}
+else if(days === 2){
+countdownBox.style.color = "#9c27b0"; // violet
+}
+else if(days === 3){
+countdownBox.style.color = "#ffeb3b"; // yellow
+}
+else if(days === 4){
+countdownBox.style.color = "#ff9800"; // orange
+}
+else if(days === 5){
+countdownBox.style.color = "#4caf50"; // green
+}
+else if(days === 6){
+countdownBox.style.color = "#2196f3"; // blue
+}
+else if(days >= 7){
+countdownBox.style.color = "#ffffff"; // white
+}
+
+}
+
+setInterval(simpleTodayColor,1000);
+simpleTodayColor();
+let days = Math.floor(distance/(1000*60*60*24));
+let hours = Math.floor((distance%(1000*60*60*24))/(1000*60*60));
+let minutes = Math.floor((distance%(1000*60*60))/(1000*60));
+let seconds = Math.floor((distance%(1000*60))/1000);
+
+document.getElementById("countdown").innerText =
+days+"d "+hours+"h "+minutes+"m "+seconds+"s remaining";
+}
+
+setInterval(updateCountdown,1000);
+
+function toggleLang(btn){
+let syllabus = btn.previousElementSibling;
+if(btn.innerText==="বাংলা"){
+syllabus.innerText = syllabus.getAttribute("data-bn");
+btn.innerText="English";
+}else{
+syllabus.innerText = syllabus.getAttribute("data-en");
+btn.innerText="বাংলা";
+}
+}
+  function formatDate(date){
+let year = date.getFullYear();
+let month = String(date.getMonth()+1).padStart(2,'0');
+let day = String(date.getDate()).padStart(2,'0');
+return year+"-"+month+"-"+day;
+  }
+
+// FLOAT ON SCROLL
+window.addEventListener("scroll",function(){
+let buttons = document.getElementById("topButtons");
+if(window.scrollY > 50){
+buttons.classList.add("float");
+}else{
+buttons.classList.remove("float");
+}
+});
+/* ===== 24H ALERT MODE ===== */
+
+function check24hAlert(){
+
+if(!upcomingDate) return;
+
+let now = new Date();
+let examDate = new Date(upcomingDate);
+examDate.setHours(17,0,0,0);
+
+let diff = examDate - now;
+let countdownBox = document.getElementById("countdown");
+
+// 24 ঘণ্টা = 86400000 ms
+if(diff <= 86400000 && diff > 0){
+countdownBox.classList.add("alert-24h");
+}else{
+countdownBox.classList.remove("alert-24h");
+}
+
+}
+
+setInterval(check24hAlert,1000);
+check24hAlert();
+/* ===== EXAM COMPLETE ANIMATION ===== */
+
+function checkExamComplete(){
+
+if(!upcomingDate) return;
+
+let now = new Date();
+let examDate = new Date(upcomingDate);
+examDate.setHours(17,0,0,0);
+
+let midnight = new Date(upcomingDate);
+midnight.setHours(23,59,59,999);
+
+if(now >= examDate && now <= midnight){
+
+// Show Well Done if not already
+if(!document.querySelector(".well-done")){
+
+let popup = document.createElement("div");
+popup.className = "well-done";
+popup.innerText = "🎉 Well Done!";
+document.body.appendChild(popup);
+
+// Remove after 5 sec
+setTimeout(()=>{
+popup.remove();
+},5000);
+
+// Confetti
+for(let i=0;i<30;i++){
+let conf = document.createElement("div");
+conf.className = "confetti";
+conf.style.left = Math.random()*100 + "vw";
+conf.style.background = ["#ffeb3b","#e91e63","#4caf50","#2196f3"][Math.floor(Math.random()*4)];
+conf.style.animationDuration = (2+Math.random()*2)+"s";
+document.body.appendChild(conf);
+
+setTimeout(()=>conf.remove(),4000);
+}
+
+}
+
+}
+
+}
+
+setInterval(checkExamComplete,1000);
+checkExamComplete();
+function checkResultNotice(){
+
+if(!upcomingDate) return;
+
+let now = new Date();
+let examDate = new Date(upcomingDate);
+
+let isSameDay =
+now.getFullYear() === examDate.getFullYear() &&
+now.getMonth() === examDate.getMonth() &&
+now.getDate() === examDate.getDate();
+
+let hours = now.getHours();
+let notice = document.getElementById("resultNotice");
+
+if(isSameDay && hours >= 19 && hours < 21){
+notice.style.display = "block";
+notice.innerText = " Result out হবে আজ ১০টার মধ্যে, ধৈর্য রাখো।";
+}else{
+notice.style.display = "none";
+}
+
+}
+
+setInterval(checkResultNotice,60000);
+checkResultNotice();
+function showResultPopup(){
+
+if(!upcomingDate) return;
+
+let now = new Date();
+let examDate = new Date(upcomingDate);
+
+let isSameDay =
+now.getFullYear() === examDate.getFullYear() &&
+now.getMonth() === examDate.getMonth() &&
+now.getDate() === examDate.getDate();
+
+let hours = now.getHours();
+let popup = document.getElementById("resultPopup");
+
+if(isSameDay && hours >= 22 && hours < 24){
+
+
+
+// click করলে result.html এ যাবে
+popup.onclick = function(){
+window.location.href = "result.html";
+};
+
+// 10 সেকেন্ড পরে auto hide
+setTimeout(()=>{
+popup.style.display = "none";
+},10000);
+
+}
+
+}
+
+
+function showResultPopup(){
+
+if(!upcomingDate) return;
+
+let now = new Date();
+let examDate = new Date(upcomingDate);
+
+let isSameDay =
+now.getFullYear() === examDate.getFullYear() &&
+now.getMonth() === examDate.getMonth() &&
+now.getDate() === examDate.getDate();
+
+let hours = now.getHours();
+let popup = document.getElementById("resultPopup");
+
+if(isSameDay && hours >= 22 && hours < 24){
+
+popup.style.display = "inline-block";
+popup.innerText = " Result Out! View Your Result";
+popup.onclick = function(){
+window.location.href = "result.html";
+};
+
+setTimeout(()=>{
+popup.style.display = "none";
+},10000);
+
+}
+
+}
+
+window.addEventListener("load", showResultPopup);
+
+</script>
+
+</body>
+</html>
