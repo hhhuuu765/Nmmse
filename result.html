@@ -816,6 +816,7 @@ completed.innerHTML+=`
 <div>
 <div>
 <div class="name">Sanjukta</div>
+<div class="raw-score">${marksData[dateStr].s}/${marksData[dateStr].total}</div>
 <div class="percent count" data-value="${sPer.toFixed(1)}">0%</div>
 <div class="improve ${changeS>=0?'up':'down'}">
 ${changeS!==0?(changeS>0?'↑':'↓')+' '+Math.abs(changeS).toFixed(1)+'%':''}
