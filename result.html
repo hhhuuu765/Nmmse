@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <div class="analysis-top-buttons">
+  <button onclick="showAnalysis('leader')">🏆 লিডারবোর্ড</button>
+  <button onclick="showAnalysis('growth')">📈 নম্বর বৃদ্ধি</button>
+  <button onclick="showAnalysis('gap')">⚖ নম্বর পার্থক্য</button>
+  <button onclick="showAnalysis('intensity')">🔥 প্রতিযোগিতা</button>
+  <button onclick="showAnalysis('tier')">🏅 পারফরম্যান্স স্তর</button>
+  <button onclick="showAnalysis('strength')">💪 সাম্প্রতিক ফর্ম</button>
+</div>
+<div id="specialEventContainer"></div>
+<div id="insightSliderWrapper">
+  <div id="insightSlider"></div>
+</div>
+<div id="analysisDisplay"></div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Result Certificate</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
+body{
+background:linear-gradient(135deg,#e3f2fd,#f5f7fa);
+padding:20px;
+color:#222;
+}
+
+.container{max-width:950px;margin:auto;}
+
+.card{
+background:white;
+border-radius:20px;
+padding:25px;
+margin-bottom:30px;
+box-shadow:0 15px 40px rgba(0,0,0,0.08);
+}
+
+.title{
+font-size:22px;
+font-weight:700;
+margin-bottom:20px;
+}
+
+.certificate{
+background:linear-gradient(135deg,#ffffff,#f0f7ff);
+border:2px solid #2196f3;
+padding:25px;
+border-radius:20px;
+margin-bottom:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.05);
+animation:fadeUp 0.7s ease;
+}
+
+@keyframes fadeUp{
+from{opacity:0;transform:translateY(25px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+.big-date{
+font-size:20px;
+font-weight:700;
+margin-bottom:10px;
+}
+
+.score-row{
+display:flex;
+justify-content:space-between;
+margin-top:10px;
+}
+
+.name{
+font-weight:600;
+}
+
+.percent{
+font-size:34px;
+font-weight:700;
+}
+
+.improve{
+font-size:14px;
+margin-top:5px;
+transition:0.3s;
+}
+
+.up{color:#2e7d32;}
+.down{color:#c62828;}
+
+.pdf-btn{
+padding:10px 18px;
+background:#2196f3;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:14px;
+margin-right:10px;
+margin-top:10px;
+transition:0.3s;
+}
+
+.pdf-btn:hover{
+transform:scale(1.05);
+background:#1976d2;
+}
+
+.timer{
+font-size:13px;
+color:#d32f2f;
+}
+.analysis-top-buttons{
+display:flex;
+gap:10px;
+overflow-x:auto;
+padding:10px 0;
+}
+
+.analysis-top-buttons button{
+padding:8px 16px;
+border:none;
+border-radius:25px;
+background:linear-gradient(135deg,#e3f2fd,#bbdefb);
+cursor:pointer;
+font-size:13px;
+transition:0.3s;
+white-space:nowrap;
+}
+
+.analysis-top-buttons button:hover{
+background:linear-gradient(135deg,#2196f3,#1976d2);
+color:white;
+transform:translateY(-2px);
+}
+
+.analysis-card{
+margin-top:10px;
+padding:20px;
+border-radius:20px;
+background:linear-gradient(135deg,#ffffff,#f5faff);
+box-shadow:0 15px 40px rgba(0,0,0,0.08);
+animation:fadeIn 0.4s ease;
+position:relative;
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(15px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+.number-box{
+display:inline-block;
+padding:6px 12px;
+background:#2196f3;
+color:white;
+border-radius:10px;
+font-weight:600;
+margin:5px 0;
+}
+
+.analysis-title{
+font-weight:700;
+margin-bottom:10px;
+}
+
+.analysis-text{
+margin:6px 0;
+line-height:1.6;
+font-size:14px;
+}
+
+.countdown{
+position:absolute;
+top:10px;
+right:15px;
+font-size:12px;
+color:#666;
+}
+#insightSliderWrapper{
+position:relative;
+height:180px;
+overflow:hidden;
+margin:20px 0;
+}
+
+.insight-slide{
+position:absolute;
+width:100%;
+padding:20px;
+border-radius:20px;
+background:linear-gradient(135deg,#ffffff,#f4f9ff);
+box-shadow:0 20px 50px rgba(0,0,0,0.08);
+opacity:0;
+transform:translateX(40px);
+transition:all 0.6s ease;
+}
+
+.insight-slide.active{
+opacity:1;
+transform:translateX(0);
+}
+
+.slide-heading{
+font-weight:700;
+font-size:16px;
+margin-bottom:10px;
+}
+
+.mini-box{
+display:inline-block;
+padding:6px 12px;
+margin:4px 6px 4px 0;
+border-radius:12px;
+background:#2196f3;
+color:white;
+font-weight:600;
+font-size:13px;
+}
+
+.explain-text{
+margin-top:10px;
+font-size:13px;
+line-height:1.6;
+color:#444;
+}
+#specialEventContainer{
+position:relative;
+margin-top:10px;
+min-height:60px;
+}
+
+.special-event{
+padding:18px 20px;
+border-radius:16px;
+background:linear-gradient(135deg,#fff3e0,#ffe0b2);
+box-shadow:0 15px 40px rgba(0,0,0,0.08);
+animation:eventSlide 0.6s ease;
+font-size:14px;
+line-height:1.6;
+position:relative;
+}
+
+@keyframes eventSlide{
+from{opacity:0;transform:translateY(20px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+.event-title{
+font-weight:700;
+margin-bottom:6px;
+}
+
+.event-countdown{
+position:absolute;
+top:10px;
+right:15px;
+font-size:12px;
+color:#555;
+}
+/* ===== PREMIUM ANALYSIS BOX ===== */
+
+.analysis-box{
+margin-top:20px;
+padding:20px;
+border-radius:18px;
+background:linear-gradient(135deg,#e3f2fd,#ffffff);
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+animation:analysisFade 1s ease;
+}
+
+@keyframes analysisFade{
+from{opacity:0;transform:scale(0.95);}
+to{opacity:1;transform:scale(1);}
+}
+
+.analysis-row{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+font-size:15px;
+}
+
+.analysis-label{
+font-weight:600;
+}
+
+.analysis-value{
+font-weight:700;
+font-size:18px;
+}
+
+canvas{max-width:100%;margin-top:15px;}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+<div class="title">Completed Exams</div>
+<div id="completedSection"></div>
+</div>
+
+<div class="card">
+<div class="title">Performance Analysis</div>
+<div id="analysisBox"></div>
+<canvas id="avgGraph"></canvas>
+</div>
+
+<div class="card">
+<div class="title">Upcoming Exams</div>
+<div id="upcomingSection"></div>
+</div>
+
+</div>
+
+<script>
+
+/* ===== MARKS DATA ===== */
+let marksData={
+"2026-02-14":{
+s:22,m:9,total:40,
+question:"https://drive.google.com/",
+answer:"https://drive.google.com/"
+},
+"2026-02-28":{
+s:27.5,m:23,total:40,
+question:"https://drive.google.com/",
+answer:"https://drive.google.com/"
+}
+};
+let autoClose;
+let countdownInterval;
+function showSpecialEvents(){
+
+let dates=Object.keys(marksData).sort();
+if(dates.length===0) return;
+
+let sArr=[], mArr=[], leaders=[];
+let prevLeader=null;
+let leaderChanged=false;
+
+dates.forEach(d=>{
+let s=(marksData[d].s/marksData[d].total)*100;
+let m=(marksData[d].m/marksData[d].total)*100;
+
+sArr.push(s);
+mArr.push(m);
+
+let currentLeader=s>m?"Sanjukta":m>s?"Mousam":null;
+leaders.push(currentLeader);
+
+if(prevLeader && currentLeader && currentLeader!==prevLeader){
+leaderChanged=true;
+}
+prevLeader=currentLeader;
+});
+
+function avg(a){return a.reduce((x,y)=>x+y,0)/a.length;}
+
+let sAvg=avg(sArr);
+let mAvg=avg(mArr);
+let gap=Math.abs(sAvg-mAvg);
+
+let eventText="";
+let title="🎉 বিশেষ অর্জন সনাক্ত হয়েছে";
+
+/* Score Milestone */
+function milestone(name,avg){
+if(avg>=80) return `🌟 ${name} ৮০% অতিক্রম করেছে — অসাধারণ সাফল্য।`;
+if(avg>=70) return `🏆 ${name} ৭০% অতিক্রম করেছে — খুবই শক্ত অবস্থান।`;
+if(avg>=60) return `✨ ${name} ৬০% অতিক্রম করেছে — ধারাবাহিক ভালো পারফরম্যান্স।`;
+return "";
+}
+
+let sMilestone=milestone("Sanjukta",sAvg);
+let mMilestone=milestone("Mousam",mAvg);
+
+/* Leader Change */
+let leaderText="";
+if(leaderChanged){
+leaderText="🔄 নেতৃত্ব পরিবর্তন হয়েছে — প্রতিযোগিতা আরও উত্তেজনাপূর্ণ হয়েছে।";
+}
+
+/* Gap Explanation */
+let gapText=`বর্তমানে দুইজনের গড় নম্বরের পার্থক্য ${gap.toFixed(1)}%। `;
+
+if(gap<5){
+gapText+="এটি খুব কাছাকাছি প্রতিযোগিতা নির্দেশ করছে।";
+}
+else if(gap<15){
+gapText+="প্রতিযোগিতা মাঝারি মাত্রার।";
+}
+else{
+gapText+="একজন স্পষ্টভাবে এগিয়ে রয়েছে।";
+}
+
+/* Combine */
+
+eventText = `
+<div class="event-title">${title}</div>
+${sMilestone ? sMilestone+"<br>" : ""}
+${mMilestone ? mMilestone+"<br>" : ""}
+${leaderText ? leaderText+"<br>" : ""}
+${gapText}
+`;
+
+/* Show */
+
+let container=document.getElementById("specialEventContainer");
+container.innerHTML=`
+<div class="special-event">
+<div class="event-countdown">৩০ সেকেন্ড</div>
+${eventText}
+</div>
+`;
+
+let seconds=30;
+
+let interval=setInterval(()=>{
+seconds--;
+let cd=document.querySelector(".event-countdown");
+if(cd) cd.innerText=seconds+" সেকেন্ড";
+},1000);
+
+setTimeout(()=>{
+container.innerHTML="";
+clearInterval(interval);
+},30000);
+
+}
+
+/* Auto Run On Load */
+
+showSpecialEvents();
+function buildInsights(){
+
+let dates=Object.keys(marksData).sort();
+if(dates.length===0) return [];
+
+let sArr=[], mArr=[], gaps=[];
+let leaderChanges=0;
+let prevLeader=null;
+
+dates.forEach(d=>{
+let s=(marksData[d].s/marksData[d].total)*100;
+let m=(marksData[d].m/marksData[d].total)*100;
+
+sArr.push(s);
+mArr.push(m);
+gaps.push(Math.abs(s-m));
+
+let leader=s>m?"Sanjukta":m>s?"Mousam":null;
+if(prevLeader && leader && leader!==prevLeader){
+leaderChanges++;
+}
+prevLeader=leader;
+});
+
+function avg(a){return a.reduce((x,y)=>x+y,0)/a.length;}
+function growth(a){
+if(a.length<2) return 0;
+let g=0;
+for(let i=1;i<a.length;i++) g+=(a[i]-a[i-1]);
+return g/(a.length-1);
+}
+
+/* Comeback */
+let comeback="বর্তমানে উল্লেখযোগ্য কামব্যাক দেখা যাচ্ছে না";
+if(gaps.length>=2 && gaps[gaps.length-1] < gaps[gaps.length-2]){
+comeback="🔥 পার্থক্য কমছে — শক্তিশালী কামব্যাক চলছে";
+}
+if(growth(mArr) > growth(sArr)){
+comeback="⚡ Mousam দ্রুত উন্নতি করছে — দ্রুত ঘুরে দাঁড়াচ্ছে";
+}
+
+/* Monthly */
+let monthMap={};
+dates.forEach(d=>{
+let month=d.slice(0,7);
+if(!monthMap[month]) monthMap[month]={s:[],m:[]};
+monthMap[month].s.push((marksData[d].s/marksData[d].total)*100);
+monthMap[month].m.push((marksData[d].m/marksData[d].total)*100);
+});
+
+let lastMonth=Object.keys(monthMap).pop();
+let monthlyBoxes="";
+let monthlyExplain="এই মাসের তথ্য এখনও পর্যাপ্ত নয়";
+
+if(lastMonth){
+let sAvg=avg(monthMap[lastMonth].s);
+let mAvg=avg(monthMap[lastMonth].m);
+monthlyBoxes=`
+<span class="mini-box">মাস: ${lastMonth}</span>
+<span class="mini-box">পরীক্ষা: ${monthMap[lastMonth].s.length}</span>
+<span class="mini-box">Sanjukta: ${sAvg.toFixed(1)}%</span>
+<span class="mini-box">Mousam: ${mAvg.toFixed(1)}%</span>
+`;
+monthlyExplain="এই মাসে কে গড়ে বেশি নম্বর পেয়েছে তা এখানে দেখানো হয়েছে।";
+}
+
+/* Leader Change */
+let leaderText="বর্তমানে নেতৃত্ব স্থিতিশীল রয়েছে";
+if(leaderChanges>0){
+leaderText="🔄 নেতৃত্ব পরিবর্তন হয়েছে — প্রতিযোগিতা উত্তেজনাপূর্ণ";
+}
+
+/* Psychological */
+let psych="পারফরম্যান্স স্থিতিশীল রয়েছে";
+if(growth(sArr)>5) psych="Sanjukta আত্মবিশ্বাসের সাথে এগোচ্ছে";
+if(growth(mArr)>5) psych="Mousam দ্রুত আত্মবিশ্বাস ফিরে পাচ্ছে";
+if(gaps[gaps.length-1]>gaps[gaps.length-2]) psych="পার্থক্য বাড়ছে — চাপ বৃদ্ধি পাচ্ছে";
+
+return[
+{
+title:"💥 Comeback Indicator",
+boxes:`<span class="mini-box">${comeback}</span>`,
+explain:"যদি পিছিয়ে থেকেও পার্থক্য কমে, তাহলে এটাকে কামব্যাক ধরা হয়।"
+},
+{
+title:"📅 Monthly Performance Summary",
+boxes:monthlyBoxes,
+explain:monthlyExplain
+},
+{
+title:"🏆 Leader Movement",
+boxes:`<span class="mini-box">${leaderText}</span>`,
+explain:"পরীক্ষাগুলোর ভিত্তিতে নেতৃত্ব পরিবর্তন হয়েছে কি না তা এখানে দেখানো হয়েছে।"
+},
+{
+title:"🧠 Psychological Trend Insight",
+boxes:`<span class="mini-box">${psych}</span>`,
+explain:"নম্বরের ধারাবাহিক পরিবর্তন দেখে মানসিক অবস্থা অনুমান করা হয়েছে।"
+}
+];
+}
+
+/* Auto Slider 10 sec */
+
+function startInsightSlider(){
+
+let insights=buildInsights();
+if(insights.length===0) return;
+
+let container=document.getElementById("insightSlider");
+let index=0;
+
+function show(){
+
+container.innerHTML="";
+let slide=document.createElement("div");
+slide.className="insight-slide active";
+
+slide.innerHTML=`
+<div class="slide-heading">${insights[index].title}</div>
+<div>${insights[index].boxes}</div>
+<div class="explain-text">${insights[index].explain}</div>
+`;
+
+container.appendChild(slide);
+index=(index+1)%insights.length;
+}
+
+show();
+setInterval(show,10000);
+}
+
+startInsightSlider();
+function calculateData(){
+
+let dates=Object.keys(marksData).sort();
+if(dates.length===0) return null;
+
+let sArr=[], mArr=[], gaps=[];
+let sWins=0, mWins=0;
+
+dates.forEach(d=>{
+let s=(marksData[d].s/marksData[d].total)*100;
+let m=(marksData[d].m/marksData[d].total)*100;
+
+sArr.push(s);
+mArr.push(m);
+
+if(s>m) sWins++;
+else if(m>s) mWins++;
+
+gaps.push(Math.abs(s-m));
+});
+
+function avg(arr){
+return arr.reduce((a,b)=>a+b,0)/arr.length;
+}
+
+function growth(arr){
+if(arr.length<2) return 0;
+let totalGrowth=0;
+for(let i=1;i<arr.length;i++){
+totalGrowth+=(arr[i]-arr[i-1]);
+}
+return totalGrowth/(arr.length-1);
+}
+
+function strength(arr){
+if(arr.length<3) return "তথ্য এখনও পর্যাপ্ত নয়";
+let overall=avg(arr);
+let last3=avg(arr.slice(-3));
+if(last3>overall) return "সাম্প্রতিক পরীক্ষাগুলোতে আগের তুলনায় ভালো করছে";
+if(last3<overall) return "সাম্প্রতিক পরীক্ষাগুলোতে কিছুটা দুর্বল হয়েছে";
+return "স্থিতিশীল পারফরম্যান্স বজায় রেখেছে";
+}
+
+function intensity(g){
+if(g<5) return "খুবই প্রতিদ্বন্দ্বিতাপূর্ণ প্রতিযোগিতা চলছে";
+if(g<15) return "মাঝারি মাত্রার প্রতিযোগিতা চলছে";
+return "বর্তমানে একজন স্পষ্টভাবে এগিয়ে আছে";
+}
+
+function tier(v){
+if(v>=85) return "Elite (অসাধারণ)";
+if(v>=70) return "Excellent (খুব ভালো)";
+if(v>=60) return "Strong (ভালো অবস্থানে)";
+if(v>=50) return "Developing (উন্নতির পথে)";
+return "Needs Focus (আরও মনোযোগ প্রয়োজন)";
+}
+
+return{
+total:dates.length,
+sWins,
+mWins,
+avgGap:avg(gaps),
+gapTrend:gaps.length>=2?
+(gaps[gaps.length-1]>gaps[gaps.length-2]?"নম্বরের পার্থক্য বাড়ছে":"নম্বরের পার্থক্য কমছে"):"স্থিতিশীল",
+sGrowth:growth(sArr),
+mGrowth:growth(mArr),
+sAvg:avg(sArr),
+mAvg:avg(mArr),
+sStrength:strength(sArr),
+mStrength:strength(mArr),
+competition:intensity(avg(gaps)),
+sTier:tier(avg(sArr)),
+mTier:tier(avg(mArr))
+};
+}
+
+function showAnalysis(type){
+
+let data=calculateData();
+if(!data) return;
+
+clearTimeout(autoClose);
+clearInterval(countdownInterval);
+
+let seconds=15;
+
+let content="";
+
+if(type==="leader"){
+content=`
+<div class="analysis-title">🏆 লিডারবোর্ড বিশ্লেষণ</div>
+<div class="analysis-text">মোট পরীক্ষা হয়েছে <span class="number-box">${data.total}</span> টি।</div>
+<div class="analysis-text">Sanjukta এগিয়ে রয়েছে <span class="number-box">${data.sWins}</span> বার।</div>
+<div class="analysis-text">Mousam এগিয়ে রয়েছে <span class="number-box">${data.mWins}</span> বার।</div>
+<div class="analysis-text">এখানে দেখানো হচ্ছে কে কতবার বেশি নম্বর পেয়েছে।</div>
+`;
+}
+
+if(type==="growth"){
+content=`
+<div class="analysis-title">📈 প্রতি পরীক্ষায় গড় নম্বর বৃদ্ধি</div>
+<div class="analysis-text">
+Sanjukta প্রতি পরীক্ষায় গড়ে <span class="number-box">${data.sGrowth.toFixed(1)}%</span> নম্বর বৃদ্ধি করছে।
+</div>
+<div class="analysis-text">
+Mousam প্রতি পরীক্ষায় গড়ে <span class="number-box">${data.mGrowth.toFixed(1)}%</span> নম্বর বৃদ্ধি করছে।
+</div>
+<div class="analysis-text">
+এর অর্থ: আগের পরীক্ষার তুলনায় পরবর্তী পরীক্ষায় কত শতাংশ নম্বর বাড়ছে বা কমছে তা এখানে বোঝানো হয়েছে।
+</div>
+`;
+}
+
+if(type==="gap"){
+content=`
+<div class="analysis-title">⚖ দুইজনের গড় নম্বর পার্থক্য</div>
+<div class="analysis-text">
+দুইজনের গড় নম্বর পার্থক্য <span class="number-box">${data.avgGap.toFixed(1)}%</span>
+</div>
+<div class="analysis-text">${data.gapTrend}</div>
+<div class="analysis-text">
+এই অংশ থেকে বোঝা যায় প্রতিযোগিতা ধীরে ধীরে সমান হচ্ছে নাকি একজন এগিয়ে যাচ্ছে।
+</div>
+`;
+}
+
+if(type==="intensity"){
+content=`
+<div class="analysis-title">🔥 প্রতিযোগিতার বর্তমান অবস্থা</div>
+<div class="analysis-text">
+বর্তমান গড় পার্থক্যের ভিত্তিতে: <span class="number-box">${data.competition}</span>
+</div>
+`;
+}
+
+if(type==="tier"){
+content=`
+<div class="analysis-title">🏅 সামগ্রিক পারফরম্যান্স স্তর</div>
+<div class="analysis-text">
+Sanjukta এর বর্তমান স্তর: <span class="number-box">${data.sTier}</span>
+</div>
+<div class="analysis-text">
+Mousam এর বর্তমান স্তর: <span class="number-box">${data.mTier}</span>
+</div>
+`;
+}
+
+if(type==="strength"){
+content=`
+<div class="analysis-title">💪 সাম্প্রতিক ফর্ম বিশ্লেষণ</div>
+<div class="analysis-text">
+Sanjukta: ${data.sStrength}
+</div>
+<div class="analysis-text">
+Mousam: ${data.mStrength}
+</div>
+`;
+}
+
+document.getElementById("analysisDisplay").innerHTML=
+`<div class="analysis-card">
+<div class="countdown">${seconds} সেকেন্ড</div>
+${content}
+</div>`;
+
+countdownInterval=setInterval(()=>{
+seconds--;
+let cd=document.querySelector(".countdown");
+if(cd) cd.innerText=seconds+" সেকেন্ড";
+},1000);
+
+autoClose=setTimeout(()=>{
+document.getElementById("analysisDisplay").innerHTML="";
+clearInterval(countdownInterval);
+},15000);
+}
+function formatDate(date){
+let y=date.getFullYear();
+let m=(date.getMonth()+1).toString().padStart(2,"0");
+let d=date.getDate().toString().padStart(2,"0");
+return `${y}-${m}-${d}`;
+}
+
+function generateExams(){
+let exams=[];
+for(let month=2;month<=5;month++){
+let d=new Date(2026,month-1,1);
+let sats=[];
+while(d.getMonth()==month-1){
+if(d.getDay()==6)sats.push(new Date(d));
+d.setDate(d.getDate()+1);
+}
+if(sats[1])exams.push({date:sats[1],total:40});
+if(sats[sats.length-1])exams.push({date:sats[sats.length-1],total:40});
+}
+let d=new Date(2026,4,30);
+while(d<=new Date(2026,7,29)){
+if(d.getDay()==6)exams.push({date:new Date(d),total:60});
+d.setDate(d.getDate()+1);
+}
+return exams;
+}
+
+let exams=generateExams();
+let completed=document.getElementById("completedSection");
+let upcoming=document.getElementById("upcomingSection");
+
+let prevS=null,prevM=null;
+let totalS=0,totalM=0,count=0;
+let bestS=0,bestM=0;
+
+exams.forEach(exam=>{
+let dateStr=formatDate(exam.date);
+let now=new Date();
+
+if(marksData[dateStr]){
+
+let s=marksData[dateStr].s;
+let m=marksData[dateStr].m;
+let total=marksData[dateStr].total;
+
+let sPer=(s/total)*100;
+let mPer=(m/total)*100;
+
+bestS=Math.max(bestS,sPer);
+bestM=Math.max(bestM,mPer);
+
+totalS+=sPer;
+totalM+=mPer;
+count++;
+
+let changeS=prevS!==null?(sPer-prevS):0;
+let changeM=prevM!==null?(mPer-prevM):0;
+
+prevS=sPer;
+prevM=mPer;
+
+completed.innerHTML+=`
+<div class="certificate">
+<div class="big-date">${dateStr}</div>
+<div class="score-row">
+<div>
+<div>
+<div class="name">Sanjukta</div>
+<div class="percent count" data-value="${sPer.toFixed(1)}">0%</div>
+<div class="improve ${changeS>=0?'up':'down'}">
+${changeS!==0?(changeS>0?'↑':'↓')+' '+Math.abs(changeS).toFixed(1)+'%':''}
+</div>
+</div>
+
+<div>
+<div>
+<div class="name">Mousam</div>
+<div style="font-weight:600;margin-top:4px;">${m}/${total}</div>
+<div class="percent count" data-value="${mPer.toFixed(1)}">0%</div>
+<div class="improve ${changeM>=0?'up':'down'}">
+${changeM!==0?(changeM>0?'↑':'↓')+' '+Math.abs(changeM).toFixed(1)+'%':''}
+</div>
+</div>
+</div>
+
+<button class="pdf-btn"
+onclick="window.open('${marksData[dateStr].question}','_blank')">
+Question PDF
+</button>
+
+<button class="pdf-btn"
+onclick="window.open('${marksData[dateStr].answer}','_blank')">
+উত্তরপত্র PDF
+</button>
+</div>`;
+}
+else if(exam.date>now){
+
+let id="t"+dateStr;
+upcoming.innerHTML+=`
+<div class="certificate" style="opacity:0.7">
+<div class="big-date">${dateStr} (${exam.total} Marks)</div>
+<div class="timer" id="${id}"></div>
+</div>`;
+startTimer(exam.date,id);
+}
+});
+
+/* TIMER */
+function startTimer(target,id){
+function update(){
+let diff=target-new Date();
+if(diff<=0){
+document.getElementById(id).innerHTML="";
+return;
+}
+let d=Math.floor(diff/(1000*60*60*24));
+let h=Math.floor((diff/(1000*60*60))%24);
+let m=Math.floor((diff/(1000*60))%60);
+document.getElementById(id).innerHTML=
+`${d} দিন ${h} ঘন্টা ${m} মিনিট`;
+}
+setInterval(update,60000);
+update();
+}
+
+/* ANIMATED COUNT */
+document.querySelectorAll(".count").forEach(el=>{
+let target=parseFloat(el.dataset.value);
+let start=0;
+let duration=1000;
+let step=target/(duration/20);
+let interval=setInterval(()=>{
+start+=step;
+if(start>=target){
+start=target;
+clearInterval(interval);
+}
+el.innerText=start.toFixed(1)+"%";
+},20);
+});
+
+/* AUTO ANALYSIS */
+if(count>0){
+let avgS=(totalS/count).toFixed(1);
+let avgM=(totalM/count).toFixed(1);
+
+document.getElementById("analysisBox").innerHTML=`
+<div class="analysis-box">
+<div class="analysis-row">
+<div class="analysis-label">Sanjukta Average</div>
+<div class="analysis-value">${avgS}%</div>
+</div>
+
+<div class="analysis-row">
+<div class="analysis-label">Mousam Average</div>
+<div class="analysis-value">${avgM}%</div>
+</div>
+
+<div class="analysis-row">
+<div class="analysis-label">Best Performance</div>
+<div class="analysis-value">
+Sanjukta: ${bestS.toFixed(1)}% |
+Mousam: ${bestM.toFixed(1)}%
+</div>
+</div>
+</div>`;
+}
+
+/* GRAPH */
+new Chart(avgGraph,{
+type:"bar",
+data:{
+labels:["Sanjukta Avg","Mousam Avg"],
+datasets:[{
+data:[totalS/count,totalM/count],
+backgroundColor:["#e91e63","#2196f3"]
+}]
+},
+options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100}}}
+});
+
+</script>
+</body>
+</html>
